@@ -39,6 +39,7 @@ class MockConnectionManagerConfig : public ConnectionManagerConfig {
 public:
   MockConnectionManagerConfig() {
     ON_CALL(*this, generateRequestId()).WillByDefault(Return(true));
+    ON_CALL(*this, isRoutable()).WillByDefault(Return(true));
     ON_CALL(*this, preserveExternalRequestId()).WillByDefault(Return(false));
   }
 
@@ -59,6 +60,7 @@ public:
   MOCK_CONST_METHOD0(maxRequestHeadersKb, uint32_t());
   MOCK_CONST_METHOD0(maxRequestHeadersCount, uint32_t());
   MOCK_CONST_METHOD0(idleTimeout, absl::optional<std::chrono::milliseconds>());
+  MOCK_CONST_METHOD0(isRoutable, bool());
   MOCK_CONST_METHOD0(maxConnectionDuration, absl::optional<std::chrono::milliseconds>());
   MOCK_CONST_METHOD0(streamIdleTimeout, std::chrono::milliseconds());
   MOCK_CONST_METHOD0(requestTimeout, std::chrono::milliseconds());
@@ -1254,7 +1256,7 @@ TEST_F(ConnectionManagerUtilityTest, RemovesProxyResponseHeaders) {
 TEST_F(ConnectionManagerUtilityTest, SanitizePathDefaultOff) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(false));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz/../a"));
+  original_headers.setPath("/xyz/../a");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
@@ -1265,7 +1267,7 @@ TEST_F(ConnectionManagerUtilityTest, SanitizePathDefaultOff) {
 TEST_F(ConnectionManagerUtilityTest, SanitizePathNormalPath) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(true));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz"));
+  original_headers.setPath("/xyz");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
@@ -1276,7 +1278,7 @@ TEST_F(ConnectionManagerUtilityTest, SanitizePathNormalPath) {
 TEST_F(ConnectionManagerUtilityTest, SanitizePathRelativePAth) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(true));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz/../abc"));
+  original_headers.setPath("/xyz/../abc");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
@@ -1288,7 +1290,7 @@ TEST_F(ConnectionManagerUtilityTest, MergeSlashesDefaultOff) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(true));
   ON_CALL(config_, shouldMergeSlashes()).WillByDefault(Return(false));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz///abc"));
+  original_headers.setPath("/xyz///abc");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
@@ -1300,7 +1302,7 @@ TEST_F(ConnectionManagerUtilityTest, MergeSlashes) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(true));
   ON_CALL(config_, shouldMergeSlashes()).WillByDefault(Return(true));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz///abc"));
+  original_headers.setPath("/xyz///abc");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
@@ -1312,7 +1314,7 @@ TEST_F(ConnectionManagerUtilityTest, MergeSlashesWithoutNormalization) {
   ON_CALL(config_, shouldNormalizePath()).WillByDefault(Return(false));
   ON_CALL(config_, shouldMergeSlashes()).WillByDefault(Return(true));
   HeaderMapImpl original_headers;
-  original_headers.insertPath().value(std::string("/xyz/..//abc"));
+  original_headers.setPath("/xyz/..//abc");
 
   HeaderMapImpl header_map(static_cast<HeaderMap&>(original_headers));
   ConnectionManagerUtility::maybeNormalizePath(header_map, config_);
