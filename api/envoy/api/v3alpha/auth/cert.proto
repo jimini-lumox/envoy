@@ -200,14 +200,10 @@ message CertificateValidationContext {
     VERIFY_TRUST_CHAIN = 0;
 
     // Connections where the certificate fails verification will be permitted.
-    // For HTTP connections, the certificate details will be unconditionally placed in the
-    // *x-forwarded-untrusted-client-cert* HTTP header.
+    // For HTTP connections, the result of certificate verification can be used in route matching. (
+    // see :ref:`validated
+    // <envoy_api_field_api.v3alpha.route.RouteMatch.TlsContextMatchOptions.validated>` ).
     ACCEPT_UNTRUSTED = 1;
-
-    // Connections will be permitted without certificate verification performed.
-    // For HTTP connections, the certificate details will be unconditionally placed in the
-    // *x-forwarded-untrusted-client-cert* HTTP header.
-    NOT_VERIFIED = 2;
   }
 
   // TLS certificate data containing certificate authority certificates to use in verifying
