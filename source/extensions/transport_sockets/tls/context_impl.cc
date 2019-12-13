@@ -7,6 +7,7 @@
 
 #include "envoy/common/exception.h"
 #include "envoy/common/platform.h"
+#include "envoy/ssl/ssl_socket_extended_info.h"
 #include "envoy/stats/scope.h"
 
 #include "common/common/assert.h"
@@ -497,14 +498,16 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
   ContextImpl* impl = reinterpret_cast<ContextImpl*>(arg);
   SSL* ssl = reinterpret_cast<SSL*>(
       X509_STORE_CTX_get_ex_data(store_ctx, SSL_get_ex_data_X509_STORE_CTX_idx()));
-  SslExtendedSocketInfo* sslExtendedInfo = reinterpret_cast<SslExtendedSocketInfo*>(
-      SSL_get_ex_data(ssl, ContextImpl::sslExtendedSocketInfoIndex()));
+  Envoy::Ssl::SslExtendedSocketInfo* sslExtendedInfo =
+      reinterpret_cast<Envoy::Ssl::SslExtendedSocketInfo*>(
+          SSL_get_ex_data(ssl, ContextImpl::sslExtendedSocketInfoIndex()));
 
   if (impl->verify_trusted_ca_) {
     int ret = X509_verify_cert(store_ctx);
     if (sslExtendedInfo) {
-      sslExtendedInfo->setCertificateValidationStatus(ret == 1 ? ClientValidationStatus::Validated
-                                                               : ClientValidationStatus::Failed);
+      sslExtendedInfo->setCertificateValidationStatus(
+          ret == 1 ? Envoy::Ssl::ClientValidationStatus::Validated
+                   : Envoy::Ssl::ClientValidationStatus::Failed);
     }
 
     if (ret <= 0) {
@@ -517,33 +520,36 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
 
   const Network::TransportSocketOptions* transport_socket_options =
       static_cast<const Network::TransportSocketOptions*>(SSL_get_app_data(ssl));
-  ClientValidationStatus validated = impl->verifyCertificate(
+  Envoy::Ssl::ClientValidationStatus validated = impl->verifyCertificate(
       cert.get(), transport_socket_options &&
                           !transport_socket_options->verifySubjectAltNameListOverride().empty()
                       ? transport_socket_options->verifySubjectAltNameListOverride()
                       : impl->verify_subject_alt_name_list_);
 
   if (sslExtendedInfo) {
-    if (sslExtendedInfo->certificateValidationStatus() == ClientValidationStatus::NotValidated) {
+    if (sslExtendedInfo->certificateValidationStatus() ==
+        Envoy::Ssl::ClientValidationStatus::NotValidated) {
       sslExtendedInfo->setCertificateValidationStatus(validated);
-    } else if (validated != ClientValidationStatus::NotValidated) {
+    } else if (validated != Envoy::Ssl::ClientValidationStatus::NotValidated) {
       sslExtendedInfo->setCertificateValidationStatus(validated);
     }
   }
 
-  return impl->allow_untrusted_certificate_ ? 1 : (validated != ClientValidationStatus::Failed);
+  return impl->allow_untrusted_certificate_
+             ? 1
+             : (validated != Envoy::Ssl::ClientValidationStatus::Failed);
 }
 
-ClientValidationStatus
+Envoy::Ssl::ClientValidationStatus
 ContextImpl::verifyCertificate(X509* cert, const std::vector<std::string>& verify_san_list) {
-  ClientValidationStatus validated = ClientValidationStatus::NotValidated;
+  Envoy::Ssl::ClientValidationStatus validated = Envoy::Ssl::ClientValidationStatus::NotValidated;
 
   if (!verify_san_list.empty()) {
     if (!verifySubjectAltName(cert, verify_san_list)) {
       stats_.fail_verify_san_.inc();
-      return ClientValidationStatus::Failed;
+      return Envoy::Ssl::ClientValidationStatus::Failed;
     }
-    validated = ClientValidationStatus::Validated;
+    validated = Envoy::Ssl::ClientValidationStatus::Validated;
   }
 
   if (!verify_certificate_hash_list_.empty() || !verify_certificate_spki_list_.empty()) {
@@ -556,10 +562,10 @@ ContextImpl::verifyCertificate(X509* cert, const std::vector<std::string>& verif
 
     if (!valid_certificate_hash && !valid_certificate_spki) {
       stats_.fail_verify_cert_hash_.inc();
-      return ClientValidationStatus::Failed;
+      return Envoy::Ssl::ClientValidationStatus::Failed;
     }
 
-    validated = ClientValidationStatus::Validated;
+    validated = Envoy::Ssl::ClientValidationStatus::Validated;
   }
 
   return validated;

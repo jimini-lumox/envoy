@@ -7,6 +7,7 @@
 #include "envoy/network/transport_socket.h"
 #include "envoy/secret/secret_callbacks.h"
 #include "envoy/ssl/private_key/private_key_callbacks.h"
+#include "envoy/ssl/ssl_socket_extended_info.h"
 #include "envoy/stats/scope.h"
 #include "envoy/stats/stats_macros.h"
 
@@ -39,13 +40,14 @@ struct SslSocketFactoryStats {
 enum class InitialState { Client, Server };
 enum class SocketState { PreHandshake, HandshakeInProgress, HandshakeComplete, ShutdownSent };
 
-class SslExtendedSocketInfo {
+class SslExtendedSocketInfoImpl : public Envoy::Ssl::SslExtendedSocketInfo {
 public:
-  void setCertificateValidationStatus(ClientValidationStatus validated);
-  ClientValidationStatus certificateValidationStatus() const;
+  void setCertificateValidationStatus(Envoy::Ssl::ClientValidationStatus validated) override;
+  Envoy::Ssl::ClientValidationStatus certificateValidationStatus() const override;
 
 private:
-  ClientValidationStatus certificate_validation_status_{ClientValidationStatus::NotValidated};
+  Envoy::Ssl::ClientValidationStatus certificate_validation_status_{
+      Envoy::Ssl::ClientValidationStatus::NotValidated};
 };
 
 class SslSocketInfo : public Envoy::Ssl::ConnectionInfo {
@@ -91,7 +93,7 @@ private:
   mutable std::vector<std::string> cached_dns_san_local_certificate_;
   mutable std::string cached_session_id_;
   mutable std::string cached_tls_version_;
-  mutable SslExtendedSocketInfo extended_socket_info_;
+  mutable SslExtendedSocketInfoImpl extended_socket_info_;
 };
 
 class SslSocket : public Network::TransportSocket,

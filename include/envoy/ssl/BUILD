@@ -60,3 +60,10 @@ envoy_cc_library(
         "@envoy_api//envoy/api/v2/auth:pkg_cc_proto",
     ],
 )
+
+envoy_cc_library(
+    name = "ssl_socket_extended_info_interface",
+    hdrs = ["ssl_socket_extended_info.h"],
+    deps = [
+    ],
+)
