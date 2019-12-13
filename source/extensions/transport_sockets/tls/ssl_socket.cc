@@ -302,9 +302,17 @@ void SslSocket::shutdownSsl() {
   }
 }
 
+void SslExtendedSocketInfo::setCertificateValidationStatus(ClientValidationStatus validated) {
+  certificate_validation_status_ = validated;
+}
+
+ClientValidationStatus SslExtendedSocketInfo::certificateValidationStatus() const {
+  return certificate_validation_status_;
+}
+
 SslSocketInfo::SslSocketInfo(bssl::UniquePtr<SSL> ssl, ContextImplSharedPtr ctx)
     : ssl_(std::move(ssl)) {
-  SSL_set_ex_data(ssl_.get(), ctx->sslCustomDataIndex(), &(this->certificate_validation_status_));
+  SSL_set_ex_data(ssl_.get(), ctx->SslExtendedSocketInfo(), &(this->extended_socket_info_));
 }
 
 bool SslSocketInfo::peerCertificatePresented() const {
@@ -313,7 +321,7 @@ bool SslSocketInfo::peerCertificatePresented() const {
 }
 
 bool SslSocketInfo::peerCertificateValidated() const {
-  return certificate_validation_status_ == ClientValidationStatus::Validated;
+  return extended_socket_info_.certificateValidationStatus() == ClientValidationStatus::Validated;
 }
 
 absl::Span<const std::string> SslSocketInfo::uriSanLocalCertificate() const {

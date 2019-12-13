@@ -39,6 +39,15 @@ struct SslSocketFactoryStats {
 enum class InitialState { Client, Server };
 enum class SocketState { PreHandshake, HandshakeInProgress, HandshakeComplete, ShutdownSent };
 
+class SslExtendedSocketInfo {
+public:
+  void setCertificateValidationStatus(ClientValidationStatus validated);
+  ClientValidationStatus certificateValidationStatus() const;
+
+private:
+  ClientValidationStatus certificate_validation_status_{ClientValidationStatus::NotValidated};
+};
+
 class SslSocketInfo : public Envoy::Ssl::ConnectionInfo {
 public:
   SslSocketInfo(bssl::UniquePtr<SSL> ssl, ContextImplSharedPtr ctx);
@@ -82,7 +91,7 @@ private:
   mutable std::vector<std::string> cached_dns_san_local_certificate_;
   mutable std::string cached_session_id_;
   mutable std::string cached_tls_version_;
-  ClientValidationStatus certificate_validation_status_{ClientValidationStatus::NotValidated};
+  mutable SslExtendedSocketInfo extended_socket_info_;
 };
 
 class SslSocket : public Network::TransportSocket,

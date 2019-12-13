@@ -48,7 +48,7 @@ bool cbsContainsU16(CBS& cbs, uint16_t n) {
 
 } // namespace
 
-int ContextImpl::sslCustomDataIndex() {
+int ContextImpl::sslExtendedSocketInfoIndex() {
   CONSTRUCT_ON_FIRST_USE(int, []() -> int {
     int ssl_context_index = SSL_get_ex_new_index(0, nullptr, nullptr, nullptr, nullptr);
     RELEASE_ASSERT(ssl_context_index >= 0, "");
@@ -497,14 +497,14 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
   ContextImpl* impl = reinterpret_cast<ContextImpl*>(arg);
   SSL* ssl = reinterpret_cast<SSL*>(
       X509_STORE_CTX_get_ex_data(store_ctx, SSL_get_ex_data_X509_STORE_CTX_idx()));
-  ClientValidationStatus* clientValidationStatus = reinterpret_cast<ClientValidationStatus*>(
-      SSL_get_ex_data(ssl, ContextImpl::sslCustomDataIndex()));
+  SslExtendedSocketInfo* sslExtendedInfo = reinterpret_cast<SslExtendedSocketInfo*>(
+      SSL_get_ex_data(ssl, ContextImpl::sslExtendedSocketInfoIndex()));
 
   if (impl->verify_trusted_ca_) {
     int ret = X509_verify_cert(store_ctx);
-    if (clientValidationStatus) {
-      *clientValidationStatus =
-          ret == 1 ? ClientValidationStatus::Validated : ClientValidationStatus::Failed;
+    if (sslExtendedInfo) {
+      sslExtendedInfo->setCertificateValidationStatus(ret == 1 ? ClientValidationStatus::Validated
+                                                               : ClientValidationStatus::Failed);
     }
 
     if (ret <= 0) {
@@ -523,11 +523,11 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
                       ? transport_socket_options->verifySubjectAltNameListOverride()
                       : impl->verify_subject_alt_name_list_);
 
-  if (clientValidationStatus) {
-    if (*clientValidationStatus == ClientValidationStatus::NotValidated) {
-      *clientValidationStatus = validated;
+  if (sslExtendedInfo) {
+    if (sslExtendedInfo->certificateValidationStatus() == ClientValidationStatus::NotValidated) {
+      sslExtendedInfo->setCertificateValidationStatus(validated);
     } else if (validated != ClientValidationStatus::NotValidated) {
-      *clientValidationStatus = validated;
+      sslExtendedInfo->setCertificateValidationStatus(validated);
     }
   }
 

@@ -78,10 +78,10 @@ public:
   SslStats& stats() { return stats_; }
 
   /**
-   * The global SSL-library index used for storing a pointer to the SslSocket
+   * The global SSL-library index used for storing a pointer to the SslExtendedSocketInfo
    * class in the SSL instance, for retrieval in callbacks.
    */
-  static int sslCustomDataIndex();
+  static int sslExtendedSocketInfoIndex();
 
   // Ssl::Context
   size_t daysUntilFirstCertExpires() const override;
