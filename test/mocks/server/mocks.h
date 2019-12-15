@@ -91,6 +91,7 @@ public:
   MOCK_CONST_METHOD0(mutexTracingEnabled, bool());
   MOCK_CONST_METHOD0(fakeSymbolTableEnabled, bool());
   MOCK_CONST_METHOD0(cpusetThreadsEnabled, bool());
+  MOCK_CONST_METHOD0(disabledExtensions, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(toCommandLineOptions, Server::CommandLineOptionsPtr());
 
   std::string config_path_;
@@ -110,6 +111,7 @@ public:
   bool signal_handling_enabled_{true};
   bool mutex_tracing_enabled_{};
   bool cpuset_threads_enabled_{};
+  std::vector<std::string> disabled_extensions_;
 };
 
 class MockConfigTracker : public ConfigTracker {
@@ -259,7 +261,7 @@ public:
                Network::SocketSharedPtr(Network::Address::InstanceConstSharedPtr address,
                                         Network::Address::SocketType socket_type,
                                         const Network::Socket::OptionsSharedPtr& options,
-                                        bool bind_to_port));
+                                        const ListenSocketCreationParams& params));
   MOCK_METHOD1(createDrainManager_, DrainManager*(envoy::api::v2::Listener::DrainType drain_type));
   MOCK_METHOD0(nextListenerTag, uint64_t());
 
