@@ -5,13 +5,19 @@
 #include <string>
 #include <unordered_map>
 
+#include "envoy/api/v2/discovery.pb.h"
+#include "envoy/config/bootstrap/v2/bootstrap.pb.h"
 #include "envoy/event/dispatcher.h"
+#include "envoy/service/discovery/v2/rtds.pb.h"
+#include "envoy/service/discovery/v2/rtds.pb.validate.h"
 #include "envoy/thread_local/thread_local.h"
+#include "envoy/type/percent.pb.h"
 #include "envoy/type/percent.pb.validate.h"
 
 #include "common/common/assert.h"
 #include "common/common/fmt.h"
 #include "common/common/utility.h"
+#include "common/config/api_version.h"
 #include "common/filesystem/directory.h"
 #include "common/grpc/common.h"
 #include "common/protobuf/message_validator_impl.h"
@@ -585,7 +591,8 @@ void RtdsSubscription::start() {
   // instantiated in the server instance.
   subscription_ = parent_.cm_->subscriptionFactory().subscriptionFromConfigSource(
       config_source_,
-      Grpc::Common::typeUrl(envoy::service::discovery::v2::Runtime().GetDescriptor()->full_name()),
+      Grpc::Common::typeUrl(
+          API_NO_BOOST(envoy::service::discovery::v2::Runtime)().GetDescriptor()->full_name()),
       store_, *this);
   subscription_->start({resource_name_});
 }

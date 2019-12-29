@@ -2,10 +2,6 @@ syntax = "proto3";
 
 package envoy.api.v3alpha.route;
 
-option java_package = "io.envoyproxy.envoy.api.v3alpha.route";
-option java_outer_classname = "RouteProto";
-option java_multiple_files = true;
-
 import "envoy/api/v3alpha/core/base.proto";
 import "envoy/type/matcher/v3alpha/regex.proto";
 import "envoy/type/matcher/v3alpha/string.proto";
@@ -21,6 +17,10 @@ import "google/protobuf/wrappers.proto";
 import "udpa/annotations/versioning.proto";
 
 import "validate/validate.proto";
+
+option java_package = "io.envoyproxy.envoy.api.v3alpha.route";
+option java_outer_classname = "RouteProto";
+option java_multiple_files = true;
 
 // [#protodoc-title: HTTP route]
 // * Routing :ref:`architecture overview <arch_overview_http_routing>`
@@ -490,7 +490,7 @@ message CorsPolicy {
   core.RuntimeFractionalPercent shadow_enabled = 10;
 }
 
-// [#next-free-field: 30]
+// [#next-free-field: 31]
 message RouteAction {
   option (udpa.annotations.versioning).previous_message_type = "envoy.api.v2.route.RouteAction";
 
@@ -664,7 +664,9 @@ message RouteAction {
     google.protobuf.BoolValue enabled = 2;
   }
 
-  reserved 12, 18, 19, 16, 22, 21;
+  reserved 12, 18, 19, 16, 22, 21, 10;
+
+  reserved "request_mirror_policy";
 
   oneof cluster_specifier {
     option (validate.required) = true;
@@ -795,8 +797,8 @@ message RouteAction {
   // (e.g.: policies are not merged, most internal one becomes the enforced policy).
   RetryPolicy retry_policy = 9;
 
-  // Indicates that the route has a request mirroring policy.
-  RequestMirrorPolicy request_mirror_policy = 10;
+  // Indicates that the route has request mirroring policies.
+  repeated RequestMirrorPolicy request_mirror_policies = 30;
 
   // Optionally specifies the :ref:`routing priority <arch_overview_http_routing_priority>`.
   core.RoutingPriority priority = 11 [(validate.rules).enum = {defined_only: true}];

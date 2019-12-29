@@ -6,6 +6,7 @@
 
 #include "envoy/api/v2/auth/cert.pb.h"
 #include "envoy/common/pure.h"
+#include "envoy/type/matcher/string.pb.h"
 
 namespace Envoy {
 namespace Ssl {
@@ -37,9 +38,15 @@ public:
   virtual const std::string& certificateRevocationListPath() const PURE;
 
   /**
-   * @return The subject alt names to be verified, if enabled. Otherwise, ""
+   * @return The subject alt names to be verified, if enabled.
    */
   virtual const std::vector<std::string>& verifySubjectAltNameList() const PURE;
+
+  /**
+   * @return The subject alt name matchers to be verified, if enabled.
+   */
+  virtual const std::vector<::envoy::type::matcher::StringMatcher>&
+  subjectAltNameMatchers() const PURE;
 
   /**
    * @return A list of a hex-encoded SHA-256 certificate hashes to be verified.

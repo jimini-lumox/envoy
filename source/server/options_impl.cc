@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include "envoy/admin/v2alpha/server_info.pb.h"
+
 #include "common/common/fmt.h"
 #include "common/common/logger.h"
 #include "common/common/macros.h"
@@ -234,7 +236,9 @@ OptionsImpl::OptionsImpl(std::vector<std::string> args,
     throw NoServingException();
   }
 
-  disabled_extensions_ = absl::StrSplit(disable_extensions.getValue(), ",");
+  if (!disable_extensions.getValue().empty()) {
+    disabled_extensions_ = absl::StrSplit(disable_extensions.getValue(), ",");
+  }
 }
 
 void OptionsImpl::parseComponentLogLevels(const std::string& component_log_levels) {
