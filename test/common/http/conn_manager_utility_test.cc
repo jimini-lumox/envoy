@@ -950,7 +950,6 @@ TEST_F(ConnectionManagerUtilityTest, MtlsSanitizeSetClientCert) {
   EXPECT_EQ((MutateRequestRet{"10.0.0.3:50000", false}),
             callMutateRequestHeaders(headers, Protocol::Http2));
   EXPECT_TRUE(headers.has("x-forwarded-client-cert"));
-  EXPECT_FALSE(headers.has("x-forwarded-untrusted-client-cert"));
   EXPECT_EQ("By=test://foo.com/be;Hash=abcdefg;Subject=\"/C=US/ST=CA/L=San "
             "Francisco/OU=Lyft/CN=test.lyft.com\";URI=test://foo.com/"
             "fe;Cert=\"abcde=\";Chain=\"abcde=lmnop=\"",
