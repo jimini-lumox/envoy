@@ -173,7 +173,7 @@ message TlsSessionTicketKeys {
   repeated core.DataSource keys = 1 [(validate.rules).repeated = {min_items: 1}];
 }
 
-// [#next-free-field: 10]
+// [#next-free-field: 11]
 message CertificateValidationContext {
   // Peer certificate verification mode.
   enum TrustChainVerification {
@@ -306,7 +306,7 @@ message CertificateValidationContext {
   bool allow_expired_certificate = 8;
 
   // Certificate trust chain verification mode.
-  TrustChainVerification trust_chain_verification = 9
+  TrustChainVerification trust_chain_verification = 10
       [(validate.rules).enum = {defined_only: true}];
 }
 

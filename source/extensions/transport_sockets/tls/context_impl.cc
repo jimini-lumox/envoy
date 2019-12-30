@@ -530,10 +530,11 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
       static_cast<const Network::TransportSocketOptions*>(SSL_get_app_data(ssl));
 
   Envoy::Ssl::ClientValidationStatus validated = impl->verifyCertificate(
-      cert.get(), transport_socket_options &&
-                          !transport_socket_options->verifySubjectAltNameListOverride().empty()
-                      ? transport_socket_options->verifySubjectAltNameListOverride()
-                      : impl->verify_subject_alt_name_list_,
+      cert.get(),
+      transport_socket_options &&
+              !transport_socket_options->verifySubjectAltNameListOverride().empty()
+          ? transport_socket_options->verifySubjectAltNameListOverride()
+          : impl->verify_subject_alt_name_list_,
       impl->subject_alt_name_matchers_);
 
   if (sslExtendedInfo) {
@@ -550,8 +551,7 @@ int ContextImpl::verifyCallback(X509_STORE_CTX* store_ctx, void* arg) {
              : (validated != Envoy::Ssl::ClientValidationStatus::Failed);
 }
 
-Envoy::Ssl::ClientValidationStatus
-ContextImpl::verifyCertificate(
+Envoy::Ssl::ClientValidationStatus ContextImpl::verifyCertificate(
     X509* cert, const std::vector<std::string>& verify_san_list,
     const std::vector<Matchers::StringMatcherImpl>& subject_alt_name_matchers) {
   Envoy::Ssl::ClientValidationStatus validated = Envoy::Ssl::ClientValidationStatus::NotValidated;
