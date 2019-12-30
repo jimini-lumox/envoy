@@ -66,7 +66,7 @@ public:
   /**
    * @return client certificate validation configuration.
    */
-  virtual envoy::api::v2::auth::CertificateValidationContext_TrustChainVerification
+  virtual envoy::api::v2::auth::CertificateValidationContext::TrustChainVerification
   trustChainVerification() const PURE;
 };
 
