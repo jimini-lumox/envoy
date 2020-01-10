@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "envoy/api/v2/auth/cert.pb.h"
 #include "envoy/common/pure.h"
+#include "envoy/extensions/transport_sockets/tls/v3alpha/cert.pb.h"
 #include "envoy/type/matcher/v3alpha/string.pb.h"
 
 namespace Envoy {
@@ -66,8 +66,9 @@ public:
   /**
    * @return client certificate validation configuration.
    */
-  virtual envoy::api::v2::auth::CertificateValidationContext::TrustChainVerification
-  trustChainVerification() const PURE;
+  virtual envoy::extensions::transport_sockets::tls::v3alpha::CertificateValidationContext::
+      TrustChainVerification
+      trustChainVerification() const PURE;
 };
 
 using CertificateValidationContextConfigPtr = std::unique_ptr<CertificateValidationContextConfig>;

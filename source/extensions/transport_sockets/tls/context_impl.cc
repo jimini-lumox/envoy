@@ -110,9 +110,11 @@ ContextImpl::ContextImpl(Stats::Scope& scope, const Envoy::Ssl::ContextConfig& c
   int verify_mode_validation_context = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
 
   if (config.certificateValidationContext() != nullptr) {
-    envoy::api::v2::auth::CertificateValidationContext::TrustChainVerification verification =
-        config.certificateValidationContext()->trustChainVerification();
-    if (verification == envoy::api::v2::auth::CertificateValidationContext::ACCEPT_UNTRUSTED) {
+    envoy::extensions::transport_sockets::tls::v3alpha::CertificateValidationContext::
+        TrustChainVerification verification =
+            config.certificateValidationContext()->trustChainVerification();
+    if (verification == envoy::extensions::transport_sockets::tls::v3alpha::
+                            CertificateValidationContext::ACCEPT_UNTRUSTED) {
       verify_mode = SSL_VERIFY_PEER; // Ensure client-certs will be requested even if we have
                                      // nothing to verify against
       verify_mode_validation_context = SSL_VERIFY_PEER;
@@ -410,7 +412,8 @@ ContextImpl::ContextImpl(Stats::Scope& scope, const Envoy::Ssl::ContextConfig& c
   if (config.certificateValidationContext() != nullptr) {
     allow_untrusted_certificate_ =
         config.certificateValidationContext()->trustChainVerification() ==
-        envoy::api::v2::auth::CertificateValidationContext::ACCEPT_UNTRUSTED;
+        envoy::extensions::transport_sockets::tls::v3alpha::CertificateValidationContext::
+            ACCEPT_UNTRUSTED;
   }
 
   parsed_alpn_protocols_ = parseAlpnProtocols(config.alpnProtocols());

@@ -57,7 +57,7 @@ envoy_cc_library(
     hdrs = ["certificate_validation_context_config.h"],
     deps = [
         "//source/common/common:matchers_lib",
-        "@envoy_api//envoy/api/v2/auth:pkg_cc_proto",
+        "@envoy_api//envoy/extensions/transport_sockets/tls/v3alpha:pkg_cc_proto",
         "@envoy_api//envoy/type/matcher/v3alpha:pkg_cc_proto",
     ],
 )

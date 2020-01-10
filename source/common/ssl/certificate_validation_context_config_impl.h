@@ -39,8 +39,9 @@ public:
     return verify_certificate_spki_list_;
   }
   bool allowExpiredCertificate() const override { return allow_expired_certificate_; }
-  envoy::api::v2::auth::CertificateValidationContext::TrustChainVerification
-  trustChainVerification() const override {
+  envoy::extensions::transport_sockets::tls::v3alpha::CertificateValidationContext::
+      TrustChainVerification
+      trustChainVerification() const override {
     return trust_chain_verification_;
   }
 
@@ -54,8 +55,8 @@ private:
   const std::vector<std::string> verify_certificate_hash_list_;
   const std::vector<std::string> verify_certificate_spki_list_;
   const bool allow_expired_certificate_;
-  const envoy::api::v2::auth::CertificateValidationContext::TrustChainVerification
-      trust_chain_verification_;
+  const envoy::extensions::transport_sockets::tls::v3alpha::CertificateValidationContext::
+      TrustChainVerification trust_chain_verification_;
 };
 
 } // namespace Ssl
