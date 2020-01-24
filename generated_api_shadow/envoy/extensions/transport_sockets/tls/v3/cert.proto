@@ -115,16 +115,15 @@ message PrivateKeyProvider {
   option (udpa.annotations.versioning).previous_message_type =
       "envoy.api.v2.auth.PrivateKeyProvider";
 
-  reserved 2;
-
-  reserved "config";
-
   // Private key method provider name. The name must match a
   // supported private key method provider type.
   string provider_name = 1 [(validate.rules).string = {min_bytes: 1}];
 
   // Private key method provider specific configuration.
   oneof config_type {
+    google.protobuf.Struct hidden_envoy_deprecated_config = 2
+        [deprecated = true, (udpa.annotations.sensitive) = true];
+
     google.protobuf.Any typed_config = 3 [(udpa.annotations.sensitive) = true];
   }
 }
@@ -202,14 +201,9 @@ message CertificateValidationContext {
 
     // Connections where the certificate fails verification will be permitted.
     // For HTTP connections, the result of certificate verification can be used in route matching. (
-    // see :ref:`validated
-    // <envoy_api_field_config.route.v3alpha.RouteMatch.TlsContextMatchOptions.validated>` ).
+    // see :ref:`validated <envoy_api_field_config.route.v3.RouteMatch.TlsContextMatchOptions.validated>` ).
     ACCEPT_UNTRUSTED = 1;
   }
-
-  reserved 4;
-
-  reserved "verify_subject_alt_name";
 
   // TLS certificate data containing certificate authority certificates to use in verifying
   // a presented peer certificate (e.g. server certificate for clusters or client certificate
@@ -293,6 +287,16 @@ message CertificateValidationContext {
   // a hash matching value from either of the lists will result in the certificate being accepted.
   repeated string verify_certificate_hash = 2
       [(validate.rules).repeated = {items {string {min_bytes: 64 max_bytes: 95}}}];
+
+  // An optional list of Subject Alternative Names. If specified, Envoy will verify that the
+  // Subject Alternative Name of the presented certificate matches one of the specified values.
+  //
+  // .. attention::
+  //
+  //   Subject Alternative Names are easily spoofable and verifying only them is insecure,
+  //   therefore this option must be used together with :ref:`trusted_ca
+  //   <envoy_api_field_extensions.transport_sockets.tls.v3.CertificateValidationContext.trusted_ca>`.
+  repeated string hidden_envoy_deprecated_verify_subject_alt_name = 4 [deprecated = true];
 
   // An optional list of Subject Alternative name matchers. Envoy will verify that the
   // Subject Alternative Name of the presented certificate matches one of the specified matches.
